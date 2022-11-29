@@ -80,11 +80,32 @@ func UpdateRecipeHandler(c *gin.Context) {
 
 }
 
+func DeleteRecipeHandler(c *gin.Context) {
+	id := c.Param("id")
+	idx := -1
+	for i := 0; i < len(recipes); i++ {
+		if recipes[i].ID == id {
+			idx = i
+			break
+		}
+	}
+	if idx == -1 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Recipe not found"})
+		return
+	}
+	recipes = append(recipes[:idx], recipes[idx+1:]...)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Recipe has been deleted"})
+
+}
+
 func main() {
 	r := gin.Default()
 	r.POST("/recipes", NewRecipeHandler)
 	r.GET("/recipes", ListRecipesHandler)
 	//TODO : handle case of empty ID after put execution.
 	r.PUT("/recipes/:id", UpdateRecipeHandler)
+	r.DELETE("/recipes/:id", DeleteRecipeHandler)
 	r.Run()
 }
