@@ -55,9 +55,36 @@ func ListRecipesHandler(c *gin.Context) {
 	})
 }
 
+func UpdateRecipeHandler(c *gin.Context) {
+	id := c.Param("id")
+	var recipe Recipe
+	err := c.ShouldBindJSON(&recipe)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error()})
+		return
+	}
+	idx := -1
+	for i := 0; i < len(recipes); i++ {
+		if recipes[i].ID == id {
+			idx = i
+		}
+	}
+	if idx == -1 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Recipe not found"})
+		return
+	}
+	recipes[idx] = recipe
+	c.JSON(http.StatusOK, recipe)
+
+}
+
 func main() {
 	r := gin.Default()
 	r.POST("/recipes", NewRecipeHandler)
 	r.GET("/recipes", ListRecipesHandler)
+	//TODO : handle case of empty ID after put execution.
+	r.PUT("/recipes/:id", UpdateRecipeHandler)
 	r.Run()
 }
